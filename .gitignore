@@ -1,0 +1,12 @@
+﻿venv/
+node_modules/
+__pycache__/
+*.pyc
+*.log
+server/logs/
+.vscode/
+.idea/
+dist/
+build/
+.env
+secret.key

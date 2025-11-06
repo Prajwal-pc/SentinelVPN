@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SentinelVPN | Intelligent Intrusion Detection VPN</title>
+  <link rel="stylesheet" href="vpn.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* 🚨 Alert Popup */
+    .alert-popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff0033, #ff8800);
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 80, 80, 0.8);
+      z-index: 9999;
+      animation: slideIn 0.5s ease;
+    }
+    .alert-popup h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .alert-popup p {
+      margin: 5px 0 0;
+      font-size: 0.9rem;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(200%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .fade-out { animation: fadeOut 0.6s forwards; }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="logo">Sentinel<span>VPN</span></div>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#monitor">Monitor</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1>Secure. Intelligent. Adaptive.</h1>
+      <p>Fusion of VPN security and AI-powered intrusion detection.</p>
+      <div class="buttons">
+        <button id="startBtn" class="btn">Start VPN</button>
+        <button id="stopBtn" class="btn secondary">Stop VPN</button>
+        <button class="btn" onclick="viewDashboard()">View Dashboard</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <h2>System Features</h2>
+    <div class="feature-grid">
+      <div class="card">
+        <h3>🔒 Encrypted Tunnels</h3>
+        <p>Establish TLS-secured connections for maximum data privacy.</p>
+      </div>
+      <div class="card">
+        <h3>🧠 AI-Based Detection</h3>
+        <p>Detect intrusions in VPN traffic using intelligent anomaly simulation.</p>
+      </div>
+      <div class="card">
+        <h3>📊 Real-Time Dashboard</h3>
+        <p>Monitor live VPN connections and alert logs through a modern UI.</p>
+      </div>
+      <div class="card">
+        <h3>⚡ Adaptive Defense</h3>
+        <p>Automatically respond to threats while maintaining encryption.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Monitoring Section -->
+  <section id="monitor" class="monitor">
+    <h2>Live Monitoring</h2>
+    <div class="monitor-box">
+      <p>Status: <span id="vpn-status">Disconnected</span></p>
+      <div id="log-box"></div>
+      <canvas id="threatChart"></canvas>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <h2>About SentinelVPN</h2>
+    <p>
+      SentinelVPN is a next-generation cybersecurity framework merging
+      encrypted virtual private networking with AI-driven intrusion detection
+      to ensure confidentiality, integrity, and proactive threat analysis.
+    </p>
+  </section>
+
+  <footer>
+    <p>© 2025 SentinelVPN | Designed for Secure AI-Driven Networking</p>
+  </footer>
+
+  <!-- ============================================================
+       🌐 SentinelVPN Frontend ↔ Backend Integration Script
+  ============================================================ -->
+  <script>
+    const API = "http://localhost:5000";
+    let monitoring = false;
+    let chart = null;
+    let statusInterval;
+
+    const statusEl = document.getElementById("vpn-status");
+    const logBox = document.getElementById("log-box");
+
+    // 🧠 Add Log Entries
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString();
+      logBox.innerHTML += `<p>[${time}] ${msg}</p>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 🚨 Show Intrusion Alert
+    function showAlert(title, msg) {
+      const box = document.createElement("div");
+      box.className = "alert-popup";
+      box.innerHTML = `<h3>${title}</h3><p>${msg}</p>`;
+      document.body.appendChild(box);
+      setTimeout(() => box.classList.add("fade-out"), 4000);
+      setTimeout(() => box.remove(), 4600);
+    }
+
+    // 🔌 Start VPN
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch(`${API}/vpn/toggle`, { method: "POST" });
+        const data = await res.json();
+        statusEl.textContent = data.message;
+        statusEl.style.color = data.connected ? "#00ff88" : "#ff4444";
+        addLog(`🔗 ${data.message} (IP: ${data.ip})`);
+
+        if (data.connected) {
+          startMonitoring();
+        } else {
+          stopMonitoring();
+        }
+      } catch (err) {
+        addLog("❌ Error connecting to backend.");
+      }
+    });
+
+    // ⛔ Stop VPN
+    document.getElementById("stopBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch(`${API}/vpn/toggle`, { method: "POST" });
+        const data = await res.json();
+        statusEl.textContent = "Disconnected ❌";
+        statusEl.style.color = "#ff4444";
+        stopMonitoring();
+        addLog("🔌 VPN Disconnected.");
+      } catch (err) {
+        addLog("⚠️ Error stopping VPN.");
+      }
+    });
+
+    // 📡 Monitoring Logic
+    function startMonitoring() {
+      if (monitoring) return;
+      monitoring = true;
+      initChart();
+      fetchLogs();
+      statusInterval = setInterval(fetchStatus, 3000);
+    }
+
+    function stopMonitoring() {
+      monitoring = false;
+      clearInterval(statusInterval);
+      if (chart) chart.destroy();
+      addLog("🛑 Monitoring stopped.");
+    }
+
+    // 🧾 Fetch Logs
+    async function fetchLogs() {
+      try {
+        const res = await fetch(`${API}/vpn/logs`);
+        const { logs } = await res.json();
+        logs.forEach((l, i) => setTimeout(() => addLog(l), i * 800));
+      } catch {
+        addLog("❌ Unable to load logs.");
+      }
+    }
+
+    // 📊 Fetch Live Status + Intrusion Detection
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`${API}/vpn/status`);
+        const data = await res.json();
+
+        if (!data.connected) return;
+
+        addLog(
+          `📶 ${data.timestamp}: Bandwidth=${data.bandwidth}, Threats=${data.threatsBlocked}`
+        );
+
+        // Update chart
+        const now = new Date().toLocaleTimeString();
+        chart.data.labels.push(now);
+        chart.data.datasets[0].data.push(data.threatsBlocked);
+        if (chart.data.labels.length > 15) {
+          chart.data.labels.shift();
+          chart.data.datasets[0].data.shift();
+        }
+        chart.update();
+
+        // Intrusion alerts
+        if (data.intrusion && data.intrusion.detected) {
+          showAlert(
+            `⚠️ ${data.intrusion.type}`,
+            `Severity: ${data.intrusion.severity} | ${data.intrusion.action}`
+          );
+          addLog(
+            `🚨 [${data.intrusion.timestamp}] ${data.intrusion.type} (${data.intrusion.severity})`
+          );
+
+          // Change chart color dynamically
+          chart.data.datasets[0].borderColor =
+            data.intrusion.severity === "Critical"
+              ? "#ff0033"
+              : data.intrusion.severity === "High"
+              ? "#ff8800"
+              : "#00f0ff";
+        }
+      } catch (err) {
+        addLog("⚠️ Error fetching status data.");
+      }
+    }
+
+    // 📈 Initialize Chart
+    function initChart() {
+      const ctx = document.getElementById("threatChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Threats Blocked",
+              data: [],
+              borderColor: "#00f0ff",
+              backgroundColor: "rgba(0,240,255,0.2)",
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { ticks: { color: "#aafaff" } },
+            y: { beginAtZero: true, ticks: { color: "#aafaff" } },
+          },
+          plugins: { legend: { labels: { color: "#fff" } } },
+        },
+      });
+    }
+
+    // 📊 Dashboard Placeholder
+   function viewDashboard(){
+    window.location.href = "dashboard.html";
+  }
+  </script>
+</body>
+</html>

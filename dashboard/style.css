@@ -1,0 +1,36 @@
+body {
+  background: #0a0a0a;
+  color: #00ffcc;
+  font-family: 'Consolas', monospace;
+  text-align: center;
+  margin: 20px;
+}
+h1 {
+  color: #00ffff;
+  margin-bottom: 10px;
+}
+.metrics {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.card {
+  background: #111;
+  padding: 15px;
+  border: 1px solid #00ffcc;
+  border-radius: 8px;
+  width: 180px;
+}
+pre {
+  background: #111;
+  border: 1px solid #00ffcc;
+  padding: 10px;
+  height: 200px;
+  overflow-y: scroll;
+  text-align: left;
+}
+canvas {
+  margin-top: 20px;
+  background: #111;
+  border-radius: 8px;
+}

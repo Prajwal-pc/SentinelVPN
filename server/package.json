@@ -1,0 +1,21 @@
+{
+  "name": "sentinelvpn-server",
+  "version": "1.0.0",
+  "description": "SentinelVPN backend and dashboard server",
+  "main": "vpn_server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node vpn_server.js",
+    "dashboard": "node dashboard_server.js",
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": ["vpn", "encryption", "dashboard", "websocket"],
+  "author": "Prajwal P Chandrashekar",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "ws": "^8.14.2"
+  }
+}

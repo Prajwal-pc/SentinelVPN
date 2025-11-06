@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SentinelVPN | Threat Analytics</title>
+  <link rel="stylesheet" href="vpn.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Minimal additions for dashboard layout */
+    .dash-wrap{max-width:1200px;margin:110px auto 60px;padding:0 18px}
+    .dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .dash-title{color:#00f0ff;font-size:1.6rem;font-weight:600}
+    .dash-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:16px 0 24px}
+    .kpi{background:rgba(255,255,255,0.05);border:1px solid rgba(0,240,255,0.25);border-radius:14px;padding:16px}
+    .kpi .label{color:#a7e9ff;font-size:0.85rem}
+    .kpi .value{font-size:1.8rem;font-weight:700;margin-top:6px;color:#fff}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .panel{background:rgba(255,255,255,0.05);border:1px solid rgba(0,240,255,0.25);border-radius:14px;padding:16px}
+    .panel h3{color:#00f0ff;margin:0 0 10px;font-size:1.1rem}
+    .legend{font-size:.9rem;color:#a7e9ff;margin-top:8px}
+    .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
+    .status-online{background:#00ff88;box-shadow:0 0 8px #00ff88}
+    .status-offline{background:#ff4444;box-shadow:0 0 8px #ff4444}
+
+    /* Alert toast (reuses styling idea from vpn.html) */
+    .alert-popup{position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#ff0033,#ff8800);color:#fff;padding:12px 18px;border-radius:10px;box-shadow:0 0 20px rgba(255,80,80,.8);z-index:9999;animation:slideIn .35s ease}
+    .alert-popup h4{margin:0 0 4px;font-size:1rem}
+    .alert-popup p{margin:0;font-size:.9rem}
+    @keyframes slideIn{from{transform:translateX(200%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .fade-out{animation:fadeOut .5s forwards}
+    @keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+
+    /* Buttons align with your theme */
+    .btn{background:linear-gradient(45deg,#00f0ff,#a020f0);border:none;padding:10px 16px;border-radius:8px;color:#000;font-weight:700;cursor:pointer}
+    .btn.secondary{background:linear-gradient(45deg,#333,#666);color:#fff}
+    .btn.ghost{background:transparent;border:1px solid #00f0ff;color:#a7e9ff}
+  </style>
+</head>
+<body>
+  <!-- Top Nav (reuse look) -->
+  <header class="navbar">
+    <div class="logo">Sentinel<span>VPN</span></div>
+    <nav>
+      <ul>
+        <li><a href="vpn.html">Home</a></li>
+        <li><a href="#analytics">Analytics</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dash-wrap" id="analytics">
+    <div class="dash-header">
+      <div>
+        <div class="dash-title">Threat Analytics Dashboard</div>
+        <div class="legend">
+          <span id="connBadge" class="status-dot status-offline"></span>
+          <span id="connText">Disconnected</span>
+          <span id="ipText" style="margin-left:10px;color:#a7e9ff;"></span>
+        </div>
+      </div>
+      <div class="dash-actions">
+        <button class="btn" id="btnStart">Start VPN</button>
+        <button class="btn secondary" id="btnStop">Stop VPN</button>
+        <button class="btn ghost" id="btnClear">Clear Analytics</button>
+        <button class="btn ghost" onclick="location.href='vpn.html'">Back to Monitor</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <section class="kpi-grid">
+      <div class="kpi">
+        <div class="label">Total Intrusions</div>
+        <div class="value" id="kpiTotalIntrusions">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Critical / High</div>
+        <div class="value" id="kpiSevHigh">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg Bandwidth</div>
+        <div class="value" id="kpiAvgBw">0 Mbps</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Threats Blocked (Total)</div>
+        <div class="value" id="kpiThreatsBlocked">0</div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="grid-2">
+      <div class="panel">
+        <h3>Intrusions by Severity</h3>
+        <canvas id="chartSeverity"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Top Attack Types</h3>
+        <canvas id="chartTypes"></canvas>
+      </div>
+    </section>
+
+    <section class="grid-2" style="margin-top:18px">
+      <div class="panel">
+        <h3>Bandwidth Over Time</h3>
+        <canvas id="chartBandwidth"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Threats Blocked Over Time</h3>
+        <canvas id="chartBlocked"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <section class="about" id="about" style="margin-top:20px">
+    <h2>About Analytics</h2>
+    <p>
+      This dashboard aggregates live data from the SentinelVPN backend.
+      Intrusions are counted and categorized by severity and attack type.
+      Metrics update automatically while connected.
+    </p>
+  </section>
+
+  <footer style="text-align:center;padding:20px;color:#aaa">
+    <p>© 2025 SentinelVPN | Analytics Module</p>
+  </footer>
+
+  <script>
+    // ===========================
+    // Config + State
+    // ===========================
+    const API = "http://localhost:5000";
+    const POLL_MS = 3000;
+
+    let pollTimer = null;
+    let running = false;
+
+    // Aggregates
+    const sevCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+    const typeCounts = {}; // dynamic keys
+    const bandwidthSeries = []; // [{t:string, v:number}]
+    const blockedSeries = [];  // [{t:string, v:number}]
+    let threatsBlockedTotal = 0;
+    let bandwidthSum = 0;
+    let bandwidthN = 0;
+
+    // UI
+    const elConnBadge = document.getElementById("connBadge");
+    const elConnText = document.getElementById("connText");
+    const elIpText   = document.getElementById("ipText");
+    const elKpiTot   = document.getElementById("kpiTotalIntrusions");
+    const elKpiHigh  = document.getElementById("kpiSevHigh");
+    const elKpiAvgBw = document.getElementById("kpiAvgBw");
+    const elKpiBlk   = document.getElementById("kpiThreatsBlocked");
+
+    // ===========================
+    // Toasts
+    // ===========================
+    function toast(title, msg){
+      const box = document.createElement("div");
+      box.className = "alert-popup";
+      box.innerHTML = "<h4>"+title+"</h4><p>"+msg+"</p>";
+      document.body.appendChild(box);
+      setTimeout(()=> box.classList.add("fade-out"), 3500);
+      setTimeout(()=> box.remove(), 4200);
+    }
+
+    function setOnline(ip){
+      elConnBadge.classList.remove("status-offline");
+      elConnBadge.classList.add("status-online");
+      elConnText.textContent = "Connected";
+      elIpText.textContent   = ip ? "IP: "+ip : "";
+    }
+    function setOffline(){
+      elConnBadge.classList.remove("status-online");
+      elConnBadge.classList.add("status-offline");
+      elConnText.textContent = "Disconnected";
+      elIpText.textContent   = "";
+    }
+
+    // ===========================
+    // Charts
+    // ===========================
+    let chartSev, chartTypes, chartBw, chartBlk;
+
+    function initCharts(){
+      const ctSev = document.getElementById("chartSeverity").getContext("2d");
+      const ctTyp = document.getElementById("chartTypes").getContext("2d");
+      const ctBw  = document.getElementById("chartBandwidth").getContext("2d");
+      const ctBlk = document.getElementById("chartBlocked").getContext("2d");
+
+      chartSev = new Chart(ctSev,{
+        type:"pie",
+        data:{labels:["Critical","High","Medium","Low"],datasets:[{data:[0,0,0,0]}]},
+        options:{plugins:{legend:{labels:{color:"#fff"}}}}
+      });
+
+      chartTypes = new Chart(ctTyp,{
+        type:"bar",
+        data:{labels:[],datasets:[{label:"Count",data:[]}]},
+        options:{
+          plugins:{legend:{labels:{color:"#fff"}}},
+          scales:{x:{ticks:{color:"#aafaff"}},y:{beginAtZero:true,ticks:{color:"#aafaff"}}}
+        }
+      });
+
+      chartBw = new Chart(ctBw,{
+        type:"line",
+        data:{labels:[],datasets:[{label:"Mbps",data:[],borderWidth:2,pointRadius:0,tension:.3}]},
+        options:{
+          plugins:{legend:{labels:{color:"#fff"}}},
+          scales:{x:{ticks:{color:"#aafaff"}},y:{beginAtZero:true,ticks:{color:"#aafaff"}}}
+        }
+      });
+
+      chartBlk = new Chart(ctBlk,{
+        type:"line",
+        data:{labels:[],datasets:[{label:"Threats Blocked",data:[],borderWidth:2,pointRadius:0,tension:.3}]},
+        options:{
+          plugins:{legend:{labels:{color:"#fff"}}},
+          scales:{x:{ticks:{color:"#aafaff"}},y:{beginAtZero:true,ticks:{color:"#aafaff"}}}
+        }
+      });
+    }
+
+    function refreshCharts(){
+      // Severity
+      chartSev.data.datasets[0].data = [
+        sevCounts.Critical||0, sevCounts.High||0, sevCounts.Medium||0, sevCounts.Low||0
+      ];
+      chartSev.update();
+
+      // Types
+      chartTypes.data.labels = Object.keys(typeCounts);
+      chartTypes.data.datasets[0].data = Object.values(typeCounts);
+      chartTypes.update();
+
+      // Bandwidth
+      chartBw.data.labels = bandwidthSeries.map(p=>p.t);
+      chartBw.data.datasets[0].data = bandwidthSeries.map(p=>p.v);
+      chartBw.update();
+
+      // Blocked
+      chartBlk.data.labels = blockedSeries.map(p=>p.t);
+      chartBlk.data.datasets[0].data = blockedSeries.map(p=>p.v);
+      chartBlk.update();
+    }
+
+    // ===========================
+    // Backend Calls
+    // ===========================
+    async function toggleVpn(){
+      const res = await fetch(`${API}/vpn/toggle`, {method:"POST"});
+      return res.json();
+    }
+    async function getStatus(){
+      const res = await fetch(`${API}/vpn/status`);
+      return res.json();
+    }
+
+    // ===========================
+    // Poll Loop
+    // ===========================
+    async function poll(){
+      try{
+        const data = await getStatus();
+
+        if(!data.connected){
+          setOffline();
+          return;
+        }
+        setOnline(data.ip);
+
+        // Parse bandwidth number
+        const bwVal = parseFloat((data.bandwidth||"0").replace(" Mbps",""))||0;
+        const now = new Date().toLocaleTimeString();
+
+        // Series updates (keep last 30)
+        bandwidthSeries.push({t:now, v:bwVal});
+        if(bandwidthSeries.length>30) bandwidthSeries.shift();
+
+        blockedSeries.push({t:now, v:data.threatsBlocked||0});
+        if(blockedSeries.length>30) blockedSeries.shift();
+
+        // Running stats
+        bandwidthSum += bwVal; bandwidthN += 1;
+        threatsBlockedTotal = Math.max(threatsBlockedTotal, data.threatsBlocked||0);
+
+        // Intrusion event
+        if(data.intrusion && data.intrusion.detected){
+          const sev = data.intrusion.severity||"Medium";
+          const typ = data.intrusion.type||"Unknown";
+          sevCounts[sev] = (sevCounts[sev]||0)+1;
+          typeCounts[typ] = (typeCounts[typ]||0)+1;
+
+          toast("⚠️ Intrusion Detected", `${typ} · Severity: ${sev} · ${data.intrusion.action||"Actioned"}`);
+        }
+
+        // KPIs
+        const totalIntrusions = Object.values(sevCounts).reduce((a,b)=>a+b,0);
+        elKpiTot.textContent  = totalIntrusions;
+        elKpiHigh.textContent = (sevCounts.Critical||0) + (sevCounts.High||0);
+        elKpiAvgBw.textContent= (bandwidthN? (bandwidthSum/bandwidthN).toFixed(2):0)+" Mbps";
+        elKpiBlk.textContent  = threatsBlockedTotal;
+
+        refreshCharts();
+      }catch(e){
+        // If server is down, mark offline once
+        setOffline();
+      }
+    }
+
+    // ===========================
+    // Controls
+    // ===========================
+    document.getElementById("btnStart").addEventListener("click", async ()=>{
+      const r = await toggleVpn();
+      if(r.connected && !running){
+        running = true;
+        setOnline(r.ip);
+        if(!chartSev) initCharts();
+        clearInterval(pollTimer);
+        pollTimer = setInterval(poll, POLL_MS);
+        poll(); // immediate tick
+      }else if(!r.connected){
+        setOffline();
+      }
+    });
+
+    document.getElementById("btnStop").addEventListener("click", async ()=>{
+      const r = await toggleVpn();
+      setOffline();
+      running = false;
+      clearInterval(pollTimer);
+      toast("VPN Disconnected","Monitoring stopped.");
+    });
+
+    document.getElementById("btnClear").addEventListener("click", ()=>{
+      // reset aggregates
+      for(const k of ["Critical","High","Medium","Low"]) sevCounts[k]=0;
+      for(const k of Object.keys(typeCounts)) delete typeCounts[k];
+      bandwidthSeries.length=0; blockedSeries.length=0;
+      bandwidthSum=0; bandwidthN=0; threatsBlockedTotal=0;
+      elKpiTot.textContent="0"; elKpiHigh.textContent="0";
+      elKpiAvgBw.textContent="0 Mbps"; elKpiBlk.textContent="0";
+      if(chartSev) refreshCharts();
+      toast("Cleared","Analytics reset for this session.");
+    });
+
+    // Init charts immediately for layout; will populate on connect
+    initCharts();
+    setOffline();
+  </script>
+</body>
+</html>

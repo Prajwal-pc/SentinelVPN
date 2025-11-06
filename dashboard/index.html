@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SentinelVPN Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>🛡️ SentinelVPN Live Dashboard</h1>
+
+  <div class="metrics">
+    <div class="card">Active Clients: <span id="clients">0</span></div>
+    <div class="card">Bytes Sent: <span id="sent">0</span></div>
+    <div class="card">Bytes Received: <span id="received">0</span></div>
+  </div>
+
+  <canvas id="trafficChart" width="400" height="200"></canvas>
+
+  <h2>📜 Live Logs</h2>
+  <pre id="logs"></pre>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

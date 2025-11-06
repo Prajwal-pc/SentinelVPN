@@ -1,0 +1,397 @@
+/* vpn.css */
+/* === Global Styles === */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg-dark: #0a0f1e;
+  --accent: #00f5ff;
+  --text: #eaeaea;
+  --card-bg: #121a2f;
+  --neon-blue: #00f5ff;
+  --neon-pink: #ff2e88;
+  --glow: 0 0 20px var(--neon-blue);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text);
+  scroll-behavior: smooth;
+}
+
+/* === Navbar === */
+.navbar {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background: rgba(10, 15, 30, 0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 3rem;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.logo span {
+  color: var(--neon-pink);
+}
+
+nav ul {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+nav a:hover {
+  color: var(--accent);
+}
+
+/* === Hero Section === */
+.hero {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(circle at center, #111b3c 0%, #0a0f1e 100%);
+  padding: 0 20px;
+}
+.hero h1 {
+  font-size: 3rem;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent);
+}
+.hero p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #ccc;
+}
+.buttons {
+  margin-top: 2rem;
+}
+.btn {
+  background: var(--neon-blue);
+  color: #000;
+  border: none;
+  padding: 0.8rem 1.8rem;
+  margin: 0.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.btn:hover {
+  box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+  transform: scale(1.05);
+}
+.btn.secondary {
+  background: var(--neon-pink);
+  color: #fff;
+}
+
+/* === Features Section === */
+.features {
+  padding: 5rem 3rem;
+  text-align: center;
+}
+.features h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--accent);
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+.card {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 20px var(--neon-blue);
+}
+.card h3 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+/* === Monitoring Section === */
+.monitor {
+  padding: 5rem 3rem;
+  text-align: center;
+}
+.monitor h2 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+.monitor-box {
+  background: var(--card-bg);
+  border-radius: 15px;
+  padding: 2rem;
+  display: inline-block;
+  width: 60%;
+  box-shadow: var(--glow);
+}
+.status {
+  font-weight: bold;
+  color: #ff4444;
+}
+#log-box {
+  text-align: left;
+  background: #0b1225;
+  border-radius: 10px;
+  margin-top: 1rem;
+  padding: 1rem;
+  height: 200px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  box-shadow: inset 0 0 10px rgba(0, 245, 255, 0.1);
+}
+
+/* === About === */
+.about {
+  padding: 5rem 3rem;
+  background: #0b1225;
+  text-align: center;
+}
+.about h2 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+/* === Footer === */
+footer {
+  text-align: center;
+  padding: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0a0f1e;
+}
+.footer-text {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+/* === Background Canvas Styling === */
+#network-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* behind everything */
+  background: radial-gradient(circle at center, #0a0f1e 0%, #040710 100%);
+}
+/* 🌌 Futuristic Neon UI */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: radial-gradient(circle at top left, #030014, #000);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Navigation Bar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  background: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.8rem;
+  color: #00f0ff;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.logo span {
+  color: #a020f0;
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.navbar a:hover {
+  color: #00f0ff;
+}
+
+/* Hero */
+.hero {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+   background: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+}
+
+.hero-content {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 2s ease;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  color: #00f0ff;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #ddd;
+}
+
+.buttons {
+  margin-top: 25px;
+}
+
+.btn {
+  background: linear-gradient(45deg, #00f0ff, #a020f0);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #00f0ff;
+}
+
+.secondary {
+  background: linear-gradient(45deg, #333, #666);
+}
+
+/* Features */
+.features {
+  padding: 80px 60px;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 2rem;
+  color: #00f0ff;
+  margin-bottom: 40px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px #00f0ff;
+}
+
+/* Monitoring */
+.monitor {
+  padding: 80px 50px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.monitor-box {
+  margin-top: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+#log-box {
+  margin-top: 15px;
+  height: 200px;
+  overflow-y: auto;
+  text-align: left;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  font-family: monospace;
+}
+
+canvas {
+  margin-top: 25px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  width: 100%;
+  height: 250px;
+}
+
+/* About + Footer */
+.about {
+  padding: 80px 50px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #aaa;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,25 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SentinelVPN Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 🎨 Styles -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- ⚙️ Local Chart.js (downloaded as chart.umd.js) -->
+  <!-- Ensures no 404 / MIME / Tracking Prevention issues -->
+  <script src="./chart.umd.js"></script>
 </head>
+
 <body>
-  <h1>🛡️ SentinelVPN Live Dashboard</h1>
+  <header>
+    <h1>SentinelVPN</h1>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="label">Active Clients</div>
+        <div id="k_active">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Total Msg</div>
+        <div id="k_msgs">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Bytes In</div>
+        <div id="k_in">0</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Bytes Out</div>
+        <div id="k_out">0</div>
+      </div>
+    </div>
+  </header>
 
-  <div class="metrics">
-    <div class="card">Active Clients: <span id="clients">0</span></div>
-    <div class="card">Bytes Sent: <span id="sent">0</span></div>
-    <div class="card">Bytes Received: <span id="received">0</span></div>
-  </div>
+  <main>
+    <section class="chart-card">
+      <h2>Throughput (bytes/sec)</h2>
+      <canvas id="throughputChart"></canvas>
+    </section>
 
-  <canvas id="trafficChart" width="400" height="200"></canvas>
+    <section class="logs-card">
+      <h2>Live Logs</h2>
+      <ul id="logs"></ul>
+    </section>
+  </main>
 
-  <h2>📜 Live Logs</h2>
-  <pre id="logs"></pre>
+  <footer>© 2025 SentinelVPN | Network Security Dashboard</footer>
 
-  <script src="dashboard.js"></script>
+  <!-- 📊 Load app.js after Chart.js -->
+  <script src="./app.js"></script>
 </body>
 </html>
